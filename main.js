@@ -18,7 +18,7 @@ let paddleHeight = 15;
 let paddleX = canvas.width / 2 - paddleWidth / 2;
 let paddleY = canvas.height - paddleHeight;
 
-const ballRadius = 10;
+let ballRadius = 10;
 let initialDx = 2;
 let initialDy = -2;
 let dx = initialDx;
@@ -110,7 +110,6 @@ function moveBall() {
     ballX += dx;
     ballY += dy;
 
-    // Bounce off the walls
     if (ballX + dx > canvas.width - ballRadius || ballX + dx < ballRadius) {
         dx = -dx;
     }
@@ -125,13 +124,12 @@ function moveBall() {
     ) {
         dy = -dy;
 
-        // Ensure consistent speed after hitting the paddle
         const relativeHitPos = (ballX - (paddleX + paddleWidth / 2)) / (paddleWidth / 2);
         const maxBounceAngle = Math.PI / 3;
         const angle = relativeHitPos * maxBounceAngle;
 
         const newDx = 4 * Math.sin(angle);
-        const newDy = -Math.abs(dy); // Always make sure dy goes upward (negative)
+        const newDy = -Math.abs(dy);
 
         const speed = Math.sqrt(newDx * newDx + newDy * newDy);
         const normalizedSpeed = 4;
@@ -188,14 +186,57 @@ gameRestartButton.addEventListener('click', () => {
     resetGame();
 });
 
-leftButton.addEventListener('click', (e) => {
-    leftButton = false;
-    rightButton = true;
+
+// Add touch event listeners
+canvas.addEventListener("touchstart", handleTouchStart);
+canvas.addEventListener("touchmove", handleTouchMove);
+
+function handleTouchStart(e) {
+    gameStarted = true;
+
+    const touchX = e.touches[0].clientX;
+    if (touchX < canvas.width / 2) {
+        leftPressed = true;
+        rightPressed = false;
+    } else {
+        rightPressed = true;
+        leftPressed = false;
+    }
+}
+
+function handleTouchMove(e) {
+    const touchX = e.touches[0].clientX;
+    if (touchX < canvas.width / 2) {
+        leftPressed = true;
+        rightPressed = false;
+    } else {
+        rightPressed = true;
+        leftPressed = false;
+    }
+}
+
+canvas.addEventListener("touchend", () => {
+    leftPressed = false;
+    rightPressed = false;
 });
 
-rightButton.addEventListener('click', (e) => {
-    rightButton = false;
-    leftButton = true;
+// Update button event listeners for mobile compatibility
+leftButton.addEventListener('touchstart', () => {
+    leftPressed = true;
+    rightPressed = false;
+});
+
+rightButton.addEventListener('touchstart', () => {
+    rightPressed = true;
+    leftPressed = false;
+});
+
+leftButton.addEventListener('touchend', () => {
+    leftPressed = false;
+});
+
+rightButton.addEventListener('touchend', () => {
+    rightPressed = false;
 });
 
 generateBricksPosition();
@@ -217,7 +258,7 @@ function gameLoop() {
 
     movePaddle();
     drawBricks();
-    img.onload = function() {
+    img.onload = function () {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     };
 
