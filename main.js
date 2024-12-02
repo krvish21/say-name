@@ -218,25 +218,30 @@ function handleTouchMove(e) {
 canvas.addEventListener("touchend", () => {
     leftPressed = false;
     rightPressed = false;
+    gameStarted = true;
 });
 
 // Update button event listeners for mobile compatibility
 leftButton.addEventListener('touchstart', () => {
     leftPressed = true;
     rightPressed = false;
+    gameStarted = true;
 });
 
 rightButton.addEventListener('touchstart', () => {
     rightPressed = true;
     leftPressed = false;
+    gameStarted = true;
 });
 
 leftButton.addEventListener('touchend', () => {
     leftPressed = false;
+    gameStarted = true;
 });
 
 rightButton.addEventListener('touchend', () => {
     rightPressed = false;
+    gameStarted = true;
 });
 
 generateBricksPosition();
