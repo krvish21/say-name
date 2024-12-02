@@ -4,6 +4,9 @@ const ctx = canvas.getContext('2d');
 const gameOverPrompt = document.getElementById('gameOver');
 const gameRestartButton = document.getElementById('restart');
 
+const leftButton = document.getElementById('left');
+const rightButton = document.getElementById('right');
+
 canvas.width = 300;
 canvas.height = 425;
 
@@ -183,6 +186,16 @@ function keyUpHandler(e) {
 gameRestartButton.addEventListener('click', () => {
     gameOverPrompt.style.display = 'none';
     resetGame();
+});
+
+leftButton.addEventListener('click', (e) => {
+    leftButton = false;
+    rightButton = true;
+});
+
+rightButton.addEventListener('click', (e) => {
+    rightButton = false;
+    leftButton = true;
 });
 
 generateBricksPosition();

@@ -21,6 +21,21 @@ body {
     background-color: #e6f0e6;
 }
 
+.controls {
+    position: relative;
+    width: 300px;
+    margin: 10px auto 0 auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+.controls > button {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    font-size: 60px;
+}
+
 .card .text-container {
     height: 80%;
     margin: auto;
