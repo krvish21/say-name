@@ -7,8 +7,8 @@ const gameRestartButton = document.getElementById('restart');
 const leftButton = document.getElementById('left');
 const rightButton = document.getElementById('right');
 
-canvas.width = 300;
-canvas.height = 425;
+canvas.width = 400;
+canvas.height = 625;
 
 let rightPressed = false;
 let leftPressed = false;
@@ -26,77 +26,110 @@ let dy = initialDy;
 let ballX = paddleX;
 let ballY = paddleY - 10;
 
-let bricks = [];
+let hearts = [];
+const heartsInRow = 5;
+const heartsInColoumn = 5;
+
+let particles = [];
 
 let gameStarted = false;
 let gameEnded = false;
 
-const img = new Image();
-
-img.src = 'sabaa.jpg';
-
 function drawPaddle() {
     ctx.beginPath();
     ctx.rect(paddleX, paddleY, paddleWidth, paddleHeight);
-    ctx.fillStyle = "#8f1d6e";
+    ctx.fillStyle = "red";
     ctx.fill();
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+    ctx.stroke();
     ctx.closePath();
 }
 
-function generateBricksPosition() {
-    bricks = [];
-    const bricksInRow = 6;
-    const bricksInColoumn = 5;
-    const brickWidth = canvas.width / bricksInRow;
-    const brickHeight = brickWidth;
-    const offsetTop = 2;
-    const offsetLeft = 2;
+function generateheartsPosition() {
+    hearts = [];
+    const heartSize = canvas.width / heartsInRow;
 
-    for (let i = 0; i < bricksInRow; i++) {
-        for (let j = 0; j < bricksInColoumn; j++) {
-            const brickX = offsetLeft + i * (brickWidth);
-            const brickY = offsetTop + j * (brickHeight);
-            bricks.push({
-                x: brickX,
-                y: brickY,
+    for (let i = 0; i < heartsInRow; i++) {
+        for (let j = 0; j < heartsInColoumn; j++) {
+            hearts.push({
+                x: i * heartSize,
+                y: j * heartSize,
                 destroyed: false
             });
         }
     }
 }
 
-function drawBricks() {
-    const bricksInRow = 5;
-    const brickWidth = canvas.width / bricksInRow;
-    const brickHeight = brickWidth;
-
-    for (let i = 0; i < bricks.length; i++) {
-        const brick = bricks[i];
-        if (!brick.destroyed) {
-            ctx.fillStyle = '#8f1d6e';
-            ctx.fillRect(brick.x, brick.y, brickWidth, brickHeight);
+function drawHearts() {
+    for (let i = 0; i < hearts.length; i++) {
+        const heart = hearts[i];
+        if (!heart.destroyed) {
+            drawHeart(heart.x, heart.y);
         }
     }
 }
 
-function detectCollision() {
-    for (let i = 0; i < bricks.length; i++) {
-        const brick = bricks[i];
+function drawHeart(x, y) {
+    const size = 60;
+    x = x + size / 2 + 10;
+    y = y + 5;
 
-        if (brick.destroyed) continue;
+    ctx.beginPath();
+    ctx.moveTo(x, y + size / 4);    
+    ctx.bezierCurveTo(
+        x - size / 2, y - size / 2,
+        x - size, y + size / 2,    
+        x, y + size               
+    );
+    ctx.bezierCurveTo(
+        x + size, y + size / 2,   
+        x + size / 2, y - size / 2,
+        x, y + size / 4          
+    );
+    ctx.fillStyle = "red";
+    ctx.fill();
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+}
+
+function detectCollision() {
+    for (let i = 0; i < hearts.length; i++) {
+        const heart = hearts[i];
+
+        if (heart.destroyed) continue;
 
         if (
-            ballX > brick.x &&
-            ballX < brick.x + canvas.width / 5 &&
-            ballY > brick.y &&
-            ballY < brick.y + canvas.width / 5
+            ballX > heart.x &&
+            ballX < heart.x + canvas.width / 5 &&
+            ballY > heart.y &&
+            ballY < heart.y + canvas.width / 5
         ) {
             dy = -dy;
-            brick.destroyed = true;
+            heart.destroyed = true;
+            createExplosion(heart.x, heart.y);
+
+            // Increase ball speed slightly
+            const speedIncrease = 0.1; // Adjust the increment as needed
+            const maxSpeed = 6; // Set a maximum speed limit
+
+            // Calculate the current speed
+            const currentSpeed = Math.sqrt(dx * dx + dy * dy);
+
+            // Ensure the speed doesn't exceed the maximum limit
+            if (currentSpeed + speedIncrease <= maxSpeed) {
+                const speed = currentSpeed + speedIncrease;
+                const angle = Math.atan2(dy, dx);
+
+                dx = Math.cos(angle) * speed;
+                dy = Math.sin(angle) * speed;
+            }
+
             break;
         }
     }
 }
+
 
 function drawBall() {
     ctx.beginPath();
@@ -131,8 +164,9 @@ function moveBall() {
         const newDx = 4 * Math.sin(angle);
         const newDy = -Math.abs(dy);
 
+        // Normalize speed to maintain consistency
         const speed = Math.sqrt(newDx * newDx + newDy * newDy);
-        const normalizedSpeed = 4;
+        const normalizedSpeed = Math.sqrt(dx * dx + dy * dy);
 
         dx = (newDx / speed) * normalizedSpeed;
         dy = (newDy / speed) * normalizedSpeed;
@@ -149,6 +183,60 @@ function movePaddle() {
     }
 }
 
+function createExplosion(x, y) {
+    for (let i = 0; i < 100; i++) {
+        particles.push({
+            x: x,
+            y: y,
+            radius: Math.random() * 5 + 2, 
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`, 
+            speed: Math.random() * 4 + 1, 
+            angle: Math.random() * Math.PI * 2, 
+            alpha: 1 
+        });
+    }
+}
+
+function updateParticles() {
+    particles.forEach((particle, index) => {
+        particle.x += Math.cos(particle.angle) * particle.speed;
+        particle.y += Math.sin(particle.angle) * particle.speed;
+        particle.alpha -= 0.02; 
+
+        if (particle.alpha <= 0) {
+            particles.splice(index, 1);
+        }
+    });
+}
+
+function drawHeartParticles(x, y, size, color, alpha) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(size / 100, size / 100);
+    ctx.beginPath();
+    ctx.moveTo(0, 30);
+    ctx.bezierCurveTo(-50, -50, -100, 50, 0, 100);
+    ctx.bezierCurveTo(100, 50, 50, -50, 0, 30);
+    ctx.fillStyle = `rgba(${hexToRgb(color)}, ${alpha})`;
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawParticles() {
+    particles.forEach(particle => {
+        drawHeartParticles(particle.x, particle.y, particle.radius, particle.color, particle.alpha);
+    });
+}
+
+function hexToRgb(color) {
+    const div = document.createElement('div');
+    div.style.color = color;
+    document.body.appendChild(div);
+    const rgb = getComputedStyle(div).color;
+    document.body.removeChild(div);
+    return rgb.match(/\d+/g).join(',');
+}
+
 function resetGame() {
     gameStarted = false;
     gameEnded = false;
@@ -158,7 +246,7 @@ function resetGame() {
     ballY = paddleY - 10;
     dx = initialDx;
     dy = initialDy;
-    generateBricksPosition();
+    generateheartsPosition();
 }
 
 document.addEventListener("keydown", keyDownHandler);
@@ -187,7 +275,7 @@ gameRestartButton.addEventListener('click', () => {
 });
 
 
-// Add touch event listeners
+
 canvas.addEventListener("touchstart", handleTouchStart);
 canvas.addEventListener("touchmove", handleTouchMove);
 
@@ -221,7 +309,6 @@ canvas.addEventListener("touchend", () => {
     gameStarted = true;
 });
 
-// Update button event listeners for mobile compatibility
 leftButton.addEventListener('touchstart', () => {
     leftPressed = true;
     rightPressed = false;
@@ -244,7 +331,7 @@ rightButton.addEventListener('touchend', () => {
     gameStarted = true;
 });
 
-generateBricksPosition();
+generateheartsPosition();
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -262,10 +349,9 @@ function gameLoop() {
     }
 
     movePaddle();
-    drawBricks();
-    img.onload = function () {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    };
+    drawHearts();
+    updateParticles();
+    drawParticles();
 
     requestAnimationFrame(gameLoop);
 }
