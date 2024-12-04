@@ -164,7 +164,7 @@ body {
     border: solid 3px black
 }
 
-#gameFinish > .body > #restart,
+#gameFinish > .body > #restart2,
 #gameOver > .body > #restart,
 #specialMessage > .body > #seen {
     margin-top: 15px;
