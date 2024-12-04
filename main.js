@@ -406,13 +406,15 @@ canvas.addEventListener("touchend", () => {
     gameStarted = true;
 });
 
-leftButton.addEventListener('touchstart', () => {
+leftButton.addEventListener('touchstart', (e) => {
+    e.preventDefault();
     leftPressed = true;
     rightPressed = false;
     gameStarted = true;
 });
 
 rightButton.addEventListener('touchstart', () => {
+    e.preventDefault();
     rightPressed = true;
     leftPressed = false;
     gameStarted = true;

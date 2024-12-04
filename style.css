@@ -37,6 +37,13 @@ body {
     height: 80px;
     border-radius: 50%;
     font-size: 60px;
+    border: solid 2px #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 6px;
+    margin-left: 7px;
 }
 
 .card .text-container {
