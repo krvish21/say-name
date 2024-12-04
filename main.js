@@ -83,7 +83,7 @@ const birthdayMessages = [
     "Happy birthday! May your day be filled with the same warmth and joy you bring to everyone around you, Sabaa."
 ];
 
-const randomMessage = Math.floor(Math.random() * birthdayMessages.length);
+let randomMessage = Math.floor(Math.random() * birthdayMessages.length);
 
 
 const backgroundCanvas = document.getElementById('backgroundCanvas');
@@ -190,7 +190,7 @@ function detectCollision() {
             heart.destroyed = true;
             createExplosion(heart.x, heart.y);
             if(heart.special) {
-                console.log('exploded')
+                randomMessage = Math.floor(Math.random() * birthdayMessages.length);
                 specialHeartExploded = true;
             }
 
@@ -461,6 +461,11 @@ function gameLoop() {
             messagePrompt.style.display = 'block';
             messageText.innerText = birthdayMessages[randomMessage];
             paused = true; // Pause the game when the message prompt appears
+        }
+
+        const gameOver = hearts.filter(h => h.destroyed === true).length === (heartsInColoumn * heartsInRow);
+        if(gameOver) {
+            console.log(gameOver)
         }
 
         movePaddle();
