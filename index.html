@@ -5,29 +5,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Say Hello</title>
+    <link rel="stylesheet" href="splashscreen.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="cake.css">
 </head>
 
 <body>
-
-    <div class="card">
-        <!-- <div class="back">
-            <img width="100%"
-                    src="https://1.bp.blogspot.com/-Mgj9-rbs65E/XfMoPSD5gtI/AAAAAAAAURk/NBokE2gSS2cTSJ2em5lZ5hJDuTtRN7UVwCLcBGAsYHQ/s1600/2713997.png">
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-message">
+            Happy Birthday Sabuuu!
         </div>
-        <div class="front">
-            
-        </div> -->
+    </div>
+    <div class="card">
+        
         <div class="text-container">
             <div id="gameOver">
                 <div class="title">
-                    Game Over!
+                    Game Over ho gya? <br/>
+                    Are kuch ni hota, happy birthday to you ❤️
                 </div>
                 <div class="body">
-                    <button id="restart">Restart</button>
+                    <button type="button" id="restart">Restart</button>
                 </div>
             </div>
-            <canvas id="myCanvas"></canvas>
+            <div id="specialMessage">
+                <div id="messageImg">
+                    <div id="messageText" ></div>
+                    <div class="cake">
+                        <div class="plate"></div>
+                        <div class="layer layer-bottom"></div>
+                        <div class="layer layer-middle"></div>
+                        <div class="layer layer-top"></div>
+                        <div class="icing"></div>
+                        <div class="drip drip1"></div>
+                        <div class="drip drip2"></div>
+                        <div class="drip drip3"></div>
+                        <div class="candle">
+                            <div class="flame"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="body">
+                    <button type="button" id="seen">Ok Ok!</button>
+                </div>
+            </div>
+            <div id="canvasContainer">
+                <canvas id="backgroundCanvas"></canvas>
+                <canvas id="myCanvas"></canvas>
+            </div>
         </div>
     </div>
     <div class="controls">

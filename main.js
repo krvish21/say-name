@@ -1,8 +1,22 @@
+window.addEventListener('load', () => {
+    const splashScreen = document.getElementById('splashScreen');
+
+    setTimeout(() => {
+        splashScreen.style.display = 'none';
+    }, 3000);
+});
+
+
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
 
 const gameOverPrompt = document.getElementById('gameOver');
 const gameRestartButton = document.getElementById('restart');
+
+let specialHeartExploded = false;
+const messagePrompt = document.getElementById('specialMessage');
+const messageText = document.getElementById('messageText');
+const seenButton = document.getElementById('seen');
 
 const leftButton = document.getElementById('left');
 const rightButton = document.getElementById('right');
@@ -13,7 +27,7 @@ canvas.height = 625;
 let rightPressed = false;
 let leftPressed = false;
 
-let paddleWidth = 50;
+let paddleWidth = 70;
 let paddleHeight = 15;
 let paddleX = canvas.width / 2 - paddleWidth / 2;
 let paddleY = canvas.height - paddleHeight;
@@ -35,6 +49,54 @@ let particles = [];
 let gameStarted = false;
 let gameEnded = false;
 
+let paused = false;
+
+const birthdayMessages = [
+    "Happy birthday, Sabaa! You light up the world with your smile and your kindness. I hope your day is as beautiful as you are.",
+    "Wishing the most amazing birthday to the most incredible person I know—Sabaa. May your day be filled with love, laughter, and endless joy.",
+    "To my dearest Sabaa: May this year bring you all the happiness your heart can hold. You deserve the best, today and always.",
+    "Happy birthday, my love! You're the reason my days are brighter and my heart is fuller. Cheers to you, Sabaa!",
+    "Sabaa, you make every day feel special. Today, I hope you feel as loved and cherished as you make everyone around you feel. Happy birthday!",
+    "On your birthday, I just want to remind you how loved and appreciated you are. Have a birthday as wonderful as you, Sabaa!",
+    "To the one who makes my heart skip a beat—happy birthday, Sabaa! You're my sunshine, now and forever.",
+    "Sabaa, you deserve all the love, laughter, and cake today! Wishing you a day filled with everything that makes you happiest.",
+    "Happy birthday, sweetheart! May this year be filled with beautiful moments and love that lasts a lifetime.",
+    "Sabaa, you are a blessing to everyone who knows you. Wishing you a birthday filled with endless love and sweet surprises.",
+    "To the most special person in my life—happy birthday, Sabaa! May all your dreams come true this year.",
+    "Happy birthday to my favorite person, my rock, and my everything. I hope your day is as extraordinary as you are, Sabaa.",
+    "Sabaa, on your special day, know that my heart is full of love and admiration for you. You deserve the world and more.",
+    "Happy birthday to the girl who makes life sweeter. May your day be filled with everything that makes you smile, Sabaa.",
+    "Sabaa, you light up my life in ways words can’t describe. Wishing you a birthday that’s as dazzling as your spirit.",
+    "Your laughter is the best sound, and your happiness is my greatest wish. Happy birthday, Sabaa!",
+    "Wishing you a birthday filled with sweet memories, new adventures, and all the love your heart can hold. You deserve it, Sabaa.",
+    "Happy birthday, my love! May this year be as bright and beautiful as you are. Always remember, you are cherished beyond words.",
+    "To my sunshine on a rainy day—happy birthday, Sabaa! Your smile is worth a million dollars.",
+    "Sabaa, you make the world a better place just by being you. Wishing you a birthday as wonderful as you are.",
+    "Happy birthday to the person who stole my heart and never gave it back. I love you more than words can say, Sabaa.",
+    "May your special day be filled with the joy you bring to others every day. Happy birthday, Sabaa!",
+    "Sabaa, your kind heart and bright spirit make this world a better place. Wishing you a birthday as amazing as you are.",
+    "Happy birthday to my one and only, the love of my life. You make every moment so much more special, Sabaa.",
+    "On this special day, I’m sending you hugs, kisses, and all the love in the world. Have a fantastic birthday, Sabaa!",
+    "Happy birthday to the girl who makes life more beautiful with every smile. Wishing you love, joy, and laughter today and always.",
+    "Sabaa, you're the reason I believe in love. Wishing you a birthday full of happiness and special memories.",
+    "Today, I celebrate you—your heart, your kindness, and all the beautiful ways you make the world shine brighter. Happy birthday, Sabaa!",
+    "Happy birthday! May your day be filled with the same warmth and joy you bring to everyone around you, Sabaa."
+];
+
+const randomMessage = Math.floor(Math.random() * birthdayMessages.length);
+
+
+const backgroundCanvas = document.getElementById('backgroundCanvas');
+const backgroundCtx = backgroundCanvas.getContext('2d');
+const backgroundImage = new Image();
+backgroundImage.src = 'sabaa.jpg'; // Replace with your image path
+
+backgroundImage.onload = function() {
+    backgroundCanvas.width = 400;
+    backgroundCanvas.height = 625;
+    backgroundCtx.drawImage(backgroundImage, 0, 0, 400, 625);
+};
+
 function drawPaddle() {
     ctx.beginPath();
     ctx.rect(paddleX, paddleY, paddleWidth, paddleHeight);
@@ -49,49 +111,68 @@ function drawPaddle() {
 function generateheartsPosition() {
     hearts = [];
     const heartSize = canvas.width / heartsInRow;
+    let specialIndices = [];
 
     for (let i = 0; i < heartsInRow; i++) {
         for (let j = 0; j < heartsInColoumn; j++) {
             hearts.push({
                 x: i * heartSize,
                 y: j * heartSize,
-                destroyed: false
+                destroyed: false,
+                special: false
             });
         }
     }
+
+    // Randomly select two unique indices for special hearts
+    while (specialIndices.length < 2) {
+        let index = Math.floor(Math.random() * hearts.length);
+        if (!specialIndices.includes(index)) {
+            specialIndices.push(index);
+        }
+    }
+
+    // Set the selected hearts as special
+    specialIndices.forEach(index => {
+        hearts[index].special = true;
+    });
 }
 
 function drawHearts() {
     for (let i = 0; i < hearts.length; i++) {
         const heart = hearts[i];
         if (!heart.destroyed) {
-            drawHeart(heart.x, heart.y);
+            drawHeart(heart.x, heart.y, heart.special);
         }
     }
 }
 
-function drawHeart(x, y) {
+function drawHeart(x, y, isSpecial) {
     const size = 60;
     x = x + size / 2 + 10;
     y = y + 5;
 
     ctx.beginPath();
-    ctx.moveTo(x, y + size / 4);    
+    ctx.moveTo(x, y + size / 4);
     ctx.bezierCurveTo(
         x - size / 2, y - size / 2,
-        x - size, y + size / 2,    
-        x, y + size               
+        x - size, y + size / 2,
+        x, y + size
     );
     ctx.bezierCurveTo(
-        x + size, y + size / 2,   
+        x + size, y + size / 2,
         x + size / 2, y - size / 2,
-        x, y + size / 4          
+        x, y + size / 4
     );
-    ctx.fillStyle = "red";
+    ctx.fillStyle = isSpecial ? "gold" : "red";
+    ctx.shadowColor = isSpecial ? "gold" : "transparent";
+    ctx.shadowBlur = isSpecial ? 20 : 0;
     ctx.fill();
     ctx.strokeStyle = "black";
     ctx.stroke();
+    ctx.shadowBlur = 0; // Reset shadow
 }
+
 
 function detectCollision() {
     for (let i = 0; i < hearts.length; i++) {
@@ -108,15 +189,15 @@ function detectCollision() {
             dy = -dy;
             heart.destroyed = true;
             createExplosion(heart.x, heart.y);
+            if(heart.special) {
+                console.log('exploded')
+                specialHeartExploded = true;
+            }
 
-            // Increase ball speed slightly
-            const speedIncrease = 0.1; // Adjust the increment as needed
-            const maxSpeed = 6; // Set a maximum speed limit
-
-            // Calculate the current speed
+            const speedIncrease = 0.1;
+            const maxSpeed = 6;           
             const currentSpeed = Math.sqrt(dx * dx + dy * dy);
 
-            // Ensure the speed doesn't exceed the maximum limit
             if (currentSpeed + speedIncrease <= maxSpeed) {
                 const speed = currentSpeed + speedIncrease;
                 const angle = Math.atan2(dy, dx);
@@ -134,10 +215,14 @@ function detectCollision() {
 function drawBall() {
     ctx.beginPath();
     ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "#8f1d6e";
+    ctx.fillStyle = "yellow";
     ctx.fill();
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 2;
+    ctx.stroke();
     ctx.closePath();
 }
+
 
 function moveBall() {
     ballX += dx;
@@ -164,7 +249,7 @@ function moveBall() {
         const newDx = 4 * Math.sin(angle);
         const newDy = -Math.abs(dy);
 
-        // Normalize speed to maintain consistency
+       
         const speed = Math.sqrt(newDx * newDx + newDy * newDy);
         const normalizedSpeed = Math.sqrt(dx * dx + dy * dy);
 
@@ -188,11 +273,23 @@ function createExplosion(x, y) {
         particles.push({
             x: x,
             y: y,
-            radius: Math.random() * 5 + 2, 
-            color: `hsl(${Math.random() * 360}, 100%, 50%)`, 
-            speed: Math.random() * 4 + 1, 
-            angle: Math.random() * Math.PI * 2, 
-            alpha: 1 
+            radius: Math.random() * 5 + 2,
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            speed: Math.random() * 4 + 1,
+            angle: Math.random() * Math.PI * 2,
+            alpha: 1
+        });
+    }
+    // Add confetti pieces
+    for (let i = 0; i < 20; i++) {
+        particles.push({
+            x: x,
+            y: y,
+            radius: Math.random() * 8 + 4, // Larger for confetti
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            speed: Math.random() * 3 + 1,
+            angle: Math.random() * Math.PI * 2,
+            alpha: 1
         });
     }
 }
@@ -331,6 +428,12 @@ rightButton.addEventListener('touchend', () => {
     gameStarted = true;
 });
 
+seenButton.addEventListener('click', () => {
+    specialHeartExploded = false;
+    messagePrompt.style.display = 'none';
+    paused = false;
+})
+
 generateheartsPosition();
 
 function gameLoop() {
@@ -338,20 +441,28 @@ function gameLoop() {
     drawPaddle();
     drawBall();
 
-    if (gameStarted) {
-        gameOverPrompt.style.display = 'none';
-        moveBall();
-        detectCollision();
-    }
+    if (!paused) { 
+        if (gameStarted) {
+            gameOverPrompt.style.display = 'none';
+            moveBall();
+            detectCollision();
+        }
 
-    if (gameEnded) {
-        gameOverPrompt.style.display = 'block';
-    }
+        if (gameEnded) {
+            gameOverPrompt.style.display = 'block';
+        }
 
-    movePaddle();
-    drawHearts();
-    updateParticles();
-    drawParticles();
+        if (specialHeartExploded) {
+            messagePrompt.style.display = 'block';
+            messageText.innerText = birthdayMessages[randomMessage];
+            paused = true; // Pause the game when the message prompt appears
+        }
+
+        movePaddle();
+        drawHearts();
+        updateParticles();
+        drawParticles();
+    }
 
     requestAnimationFrame(gameLoop);
 }
