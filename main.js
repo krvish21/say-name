@@ -400,7 +400,8 @@ function handleTouchMove(e) {
     }
 }
 
-canvas.addEventListener("touchend", () => {
+canvas.addEventListener("touchend", (e) => {
+    e.preventDefault();
     leftPressed = false;
     rightPressed = false;
     gameStarted = true;
@@ -413,19 +414,21 @@ leftButton.addEventListener('touchstart', (e) => {
     gameStarted = true;
 });
 
-rightButton.addEventListener('touchstart', () => {
+rightButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
     rightPressed = true;
     leftPressed = false;
     gameStarted = true;
 });
 
-leftButton.addEventListener('touchend', () => {
+leftButton.addEventListener('touchend', (e) => {
+    e.preventDefault();
     leftPressed = false;
     gameStarted = true;
 });
 
-rightButton.addEventListener('touchend', () => {
+rightButton.addEventListener('touchend', (e) => {
+    e.preventDefault();
     rightPressed = false;
     gameStarted = true;
 });
