@@ -151,7 +151,7 @@ body {
     height: 100%;
 }
 
-#gameOver, #specialMessage {
+#gameOver, #specialMessage, #gameFinish {
     display: none;
     position: absolute;
     width: 380px;
@@ -161,9 +161,10 @@ body {
     padding: 15px 10px;
     z-index: 10;
     border-radius: 10px;
-    border: solid 2px #9612
+    border: solid 3px black
 }
 
+#gameFinish > .body > #restart,
 #gameOver > .body > #restart,
 #specialMessage > .body > #seen {
     margin-top: 15px;

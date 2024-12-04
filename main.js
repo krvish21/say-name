@@ -13,6 +13,10 @@ const ctx = canvas.getContext('2d');
 const gameOverPrompt = document.getElementById('gameOver');
 const gameRestartButton = document.getElementById('restart');
 
+const gameRestartButton2 = document.getElementById('restart2');
+
+const gameFinish = document.getElementById('gameFinish');
+
 let specialHeartExploded = false;
 const messagePrompt = document.getElementById('specialMessage');
 const messageText = document.getElementById('messageText');
@@ -20,6 +24,12 @@ const seenButton = document.getElementById('seen');
 
 const leftButton = document.getElementById('left');
 const rightButton = document.getElementById('right');
+const pauseButton = document.getElementById('pause');
+
+
+const pauseIcon = document.getElementById('pauseIcon');
+const resumeIcon = document.getElementById('resumeIcon');
+resumeIcon.style.display = 'none';
 
 canvas.width = 400;
 canvas.height = 625;
@@ -51,16 +61,18 @@ let gameEnded = false;
 
 let paused = false;
 
+let fireworks = []; 
+
 const birthdayMessages = [
-    "Happy birthday, Sabaa! You light up the world with your smile and your kindness. I hope your day is as beautiful as you are.",
+    "Happy birthday, Sabaa! You light up the world with your smile and brilliance. I hope your day is as beautiful as you are.",
     "Wishing the most amazing birthday to the most incredible person I know—Sabaa. May your day be filled with love, laughter, and endless joy.",
     "To my dearest Sabaa: May this year bring you all the happiness your heart can hold. You deserve the best, today and always.",
-    "Happy birthday, my love! You're the reason my days are brighter and my heart is fuller. Cheers to you, Sabaa!",
+    "Happy birthday, Sabuu! You're the reason my days are brighter and my heart is fuller. Cheers to you, Sabaa!",
     "Sabaa, you make every day feel special. Today, I hope you feel as loved and cherished as you make everyone around you feel. Happy birthday!",
     "On your birthday, I just want to remind you how loved and appreciated you are. Have a birthday as wonderful as you, Sabaa!",
     "To the one who makes my heart skip a beat—happy birthday, Sabaa! You're my sunshine, now and forever.",
     "Sabaa, you deserve all the love, laughter, and cake today! Wishing you a day filled with everything that makes you happiest.",
-    "Happy birthday, sweetheart! May this year be filled with beautiful moments and love that lasts a lifetime.",
+    "Happy birthday, Sabuu! May this year be filled with beautiful moments and love that lasts a lifetime.",
     "Sabaa, you are a blessing to everyone who knows you. Wishing you a birthday filled with endless love and sweet surprises.",
     "To the most special person in my life—happy birthday, Sabaa! May all your dreams come true this year.",
     "Happy birthday to my favorite person, my rock, and my everything. I hope your day is as extraordinary as you are, Sabaa.",
@@ -69,27 +81,25 @@ const birthdayMessages = [
     "Sabaa, you light up my life in ways words can’t describe. Wishing you a birthday that’s as dazzling as your spirit.",
     "Your laughter is the best sound, and your happiness is my greatest wish. Happy birthday, Sabaa!",
     "Wishing you a birthday filled with sweet memories, new adventures, and all the love your heart can hold. You deserve it, Sabaa.",
-    "Happy birthday, my love! May this year be as bright and beautiful as you are. Always remember, you are cherished beyond words.",
+    "Happy birthday, Sabuu! May this year be as bright and beautiful as you are. Always remember, you are cherished beyond words.",
     "To my sunshine on a rainy day—happy birthday, Sabaa! Your smile is worth a million dollars.",
     "Sabaa, you make the world a better place just by being you. Wishing you a birthday as wonderful as you are.",
     "Happy birthday to the person who stole my heart and never gave it back. I love you more than words can say, Sabaa.",
     "May your special day be filled with the joy you bring to others every day. Happy birthday, Sabaa!",
-    "Sabaa, your kind heart and bright spirit make this world a better place. Wishing you a birthday as amazing as you are.",
+    "Sabaa, your mere existence makes this world a better place. Wishing you a birthday as amazing as you are.",
     "Happy birthday to my one and only, the love of my life. You make every moment so much more special, Sabaa.",
     "On this special day, I’m sending you hugs, kisses, and all the love in the world. Have a fantastic birthday, Sabaa!",
     "Happy birthday to the girl who makes life more beautiful with every smile. Wishing you love, joy, and laughter today and always.",
     "Sabaa, you're the reason I believe in love. Wishing you a birthday full of happiness and special memories.",
-    "Today, I celebrate you—your heart, your kindness, and all the beautiful ways you make the world shine brighter. Happy birthday, Sabaa!",
     "Happy birthday! May your day be filled with the same warmth and joy you bring to everyone around you, Sabaa."
 ];
 
 let randomMessage = Math.floor(Math.random() * birthdayMessages.length);
 
-
 const backgroundCanvas = document.getElementById('backgroundCanvas');
 const backgroundCtx = backgroundCanvas.getContext('2d');
 const backgroundImage = new Image();
-backgroundImage.src = 'sabaa.jpg'; // Replace with your image path
+backgroundImage.src = 'sabaa.jpg'; 
 
 backgroundImage.onload = function() {
     backgroundCanvas.width = 400;
@@ -102,9 +112,23 @@ function drawPaddle() {
     ctx.rect(paddleX, paddleY, paddleWidth, paddleHeight);
     ctx.fillStyle = "red";
     ctx.fill();
+    
+    
+    ctx.shadowColor = "rgba(255, 0, 0, 0.6)"; 
+    ctx.shadowBlur = 10; 
+    ctx.shadowOffsetX = 0; 
+    ctx.shadowOffsetY = 0; 
+    
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
     ctx.stroke();
+    
+    
+    ctx.shadowColor = "transparent"; 
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    
     ctx.closePath();
 }
 
@@ -124,7 +148,7 @@ function generateheartsPosition() {
         }
     }
 
-    // Randomly select two unique indices for special hearts
+    
     while (specialIndices.length < 2) {
         let index = Math.floor(Math.random() * hearts.length);
         if (!specialIndices.includes(index)) {
@@ -132,7 +156,7 @@ function generateheartsPosition() {
         }
     }
 
-    // Set the selected hearts as special
+    
     specialIndices.forEach(index => {
         hearts[index].special = true;
     });
@@ -170,7 +194,7 @@ function drawHeart(x, y, isSpecial) {
     ctx.fill();
     ctx.strokeStyle = "black";
     ctx.stroke();
-    ctx.shadowBlur = 0; // Reset shadow
+    ctx.shadowBlur = 0; 
 }
 
 
@@ -216,11 +240,21 @@ function drawBall() {
     ctx.beginPath();
     ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
     ctx.fillStyle = "yellow";
+    
+    
+    ctx.shadowColor = "rgba(255, 255, 0, 0.8)"; 
+    ctx.shadowBlur = 15; 
+    ctx.shadowOffsetX = 0; 
+    ctx.shadowOffsetY = 0; 
+    
     ctx.fill();
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.closePath();
+    
+    
+    ctx.shadowColor = "rgba(0, 0, 0, 0)"; 
 }
 
 
@@ -280,12 +314,12 @@ function createExplosion(x, y) {
             alpha: 1
         });
     }
-    // Add confetti pieces
+    
     for (let i = 0; i < 20; i++) {
         particles.push({
             x: x,
             y: y,
-            radius: Math.random() * 8 + 4, // Larger for confetti
+            radius: Math.random() * 8 + 4, 
             color: `hsl(${Math.random() * 360}, 100%, 50%)`,
             speed: Math.random() * 3 + 1,
             angle: Math.random() * Math.PI * 2,
@@ -368,6 +402,13 @@ function keyUpHandler(e) {
 
 gameRestartButton.addEventListener('click', () => {
     gameOverPrompt.style.display = 'none';
+    gameFinish.style.display = 'none';
+    resetGame();
+});
+
+gameRestartButton2.addEventListener('click', () => {
+    gameOverPrompt.style.display = 'none';
+    gameFinish.style.display = 'none';
     resetGame();
 });
 
@@ -439,39 +480,98 @@ seenButton.addEventListener('click', () => {
     paused = false;
 })
 
+pauseButton.addEventListener('click', () => {
+    paused = !paused; // Toggle the paused state    
+    if(paused) {
+        pauseIcon.style.display = 'none';
+        resumeIcon.style.display = 'block';
+    } else {
+        pauseIcon.style.display = 'block';
+        resumeIcon.style.display = 'none';
+    }
+});
+
 generateheartsPosition();
+
+function createFireworks(x, y) {
+    for (let i = 0; i < 50; i++) { 
+        fireworks.push({
+            x: x,
+            y: y,
+            radius: Math.random() * 5 + 2,
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            speed: Math.random() * 4 + 1,
+            angle: Math.random() * Math.PI * 2,
+            alpha: 1
+        });
+    }
+}
+
+function updateFireworks() {
+    fireworks.forEach((particle, index) => {
+        particle.x += Math.cos(particle.angle) * particle.speed;
+        particle.y += Math.sin(particle.angle) * particle.speed;
+        particle.alpha -= 0.02; 
+
+        if (particle.alpha <= 0) {
+            fireworks.splice(index, 1); 
+        }
+    });
+}
+
+function drawFireworks() {
+    fireworks.forEach(particle => {
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${hexToRgb(particle.color)}, ${particle.alpha})`;
+        ctx.fill();
+        ctx.closePath();
+    });
+}
+
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawPaddle();
     drawBall();
 
-    if (!paused) { 
+    if (!paused && !gameEnded) { 
         if (gameStarted) {
             gameOverPrompt.style.display = 'none';
             moveBall();
             detectCollision();
         }
 
-        if (gameEnded) {
-            gameOverPrompt.style.display = 'block';
-        }
-
-        if (specialHeartExploded) {
+        if (specialHeartExploded && !gameEnded) { // Prevent special heart popup after game finish
             messagePrompt.style.display = 'block';
             messageText.innerText = birthdayMessages[randomMessage];
-            paused = true; // Pause the game when the message prompt appears
+            paused = true; 
         }
 
         const gameOver = hearts.filter(h => h.destroyed === true).length === (heartsInColoumn * heartsInRow);
-        if(gameOver) {
-            console.log(gameOver)
+        if (gameOver) {
+            gameFinish.style.display = 'block';
+            gameEnded = true; // Ensure no other actions occur post-game finish
+            if (fireworks.length === 0) { 
+                for (let i = 0; i < 5; i++) { 
+                    createFireworks(
+                        Math.random() * canvas.width, 
+                        Math.random() * (canvas.height / 2) 
+                    );
+                }
+            }
+            drawFireworks();
+            updateFireworks();
         }
 
         movePaddle();
         drawHearts();
         updateParticles();
         drawParticles();
+    }
+
+    if(gameEnded) {
+        gameOverPrompt.style.display = 'block';
     }
 
     requestAnimationFrame(gameLoop);
